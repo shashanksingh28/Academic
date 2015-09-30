@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
@@ -17,6 +18,8 @@ template <class T> class DLinkedList
           Node(T data)
           {
             this -> content = data;
+            // scope for some nasty pointer bugs if not initialized as null and used with dynamic memory allocation
+            next = prev = NULL;
           }
     };
 
@@ -70,32 +73,41 @@ template <class T> class DLinkedList
     {
       if(size == 0) return -1;
       int i=0;
-
       Node<T>* current = first;
       while(current != NULL)
       {
         if(current -> content == value)
         {
+          // Check if first element
           if(current -> prev == NULL)
           {
-            // must be first element
-            first = first -> next;
-            first -> prev = NULL;
-            // take care if first == last
-            if(current == last) last = first;
-            delete current;
+            // take care if its also the last
+            if(first -> next != NULL)
+            {
+              first -> next -> prev = NULL;
+              first = first -> next;
+            }
+            else
+            {
+              first = NULL;
+              last = NULL;
+            }
           }
+          // Check if last element
           else if(current -> next == NULL)
           {
-            // must be last element
             last = last -> prev;
             last -> next = NULL;
           }
+          // somewhere in the middle
           else
           {
-            // somewhere in the middle
             current -> prev -> next = current -> next;
             current -> next -> prev = current -> prev;
+          }
+          // Ensure good housekeeping
+          {
+            current -> prev = current -> next = NULL;
             delete current;
           }
 
@@ -114,10 +126,13 @@ template <class T> class DLinkedList
     vector<T> getAll()
     {
       vector<T> v;
+
+      if(size == 0) return v;
       Node<T> * current = first;
-      for(int i = 0; current != NULL; i++, current = current -> next)
+      for(;current != NULL;)
       {
         v.push_back(current -> content);
+        current = current -> next;
       }
 
       return v;
