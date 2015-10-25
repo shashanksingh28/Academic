@@ -1,4 +1,6 @@
+#include<iostream>
 
+using namespace std;
 // This will be used to create temporary copies of pieces of the main array in scope for merging
 void copy(int source[], int destination[],int index, int size)
 {
@@ -47,7 +49,7 @@ void merge(int a[], int left, int right, int size)
         }
     }
 
-    delete(temp);
+    delete[] temp;
 }
 
 void mergesortrecur(int a[], int start, int end)
@@ -67,4 +69,43 @@ void mergesort(int a[], int size)
 {
     mergesortrecur(a, 0, size - 1);
 }
+
+void swap(int a[], int l, int r)
+{
+    a[l] = a[l] + a[r];
+    a[r] = a[l] - a[r];
+    a[l] = a[l] - a[r];
+}
+
+void heapify(int a[], int startIndex, int size)
+{
+    int maxIndex = startIndex + size - 1;
+    
+    for(int i = (size - 1) / 2 + startIndex; i>= startIndex; i--)
+    {
+        int virti = i - startIndex;
+        int lChild = 2*virti + 1 + startIndex;      
+        int rChild = 2*virti + 2 + startIndex;
+
+        if(lChild <= maxIndex && a[i] > a[lChild])
+        {
+            swap(a,i,lChild);
+        }
+        if(rChild <= maxIndex && a[i] > a[rChild])
+        {
+            swap(a,i,rChild); 
+        }   
+    }
+
+}
+
+
+void heapsort(int a[], int size)
+{
+    for(int i = 0; i < size; i++)
+    {
+        heapify(a,i,size - i);
+    }
+}
+
 
