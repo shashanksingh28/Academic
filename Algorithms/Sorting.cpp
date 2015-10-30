@@ -1,4 +1,5 @@
 #include<iostream>
+#include<assert.h>
 
 using namespace std;
 // This will be used to create temporary copies of pieces of the main array in scope for merging
@@ -72,6 +73,9 @@ void mergesort(int a[], int size)
 
 void swap(int a[], int l, int r)
 {
+    // Insidious bugs cam creep in if l and r are same
+    if(l==r) return;
+
     a[l] = a[l] + a[r];
     a[r] = a[l] - a[r];
     a[l] = a[l] - a[r];
@@ -80,11 +84,11 @@ void swap(int a[], int l, int r)
 void heapify(int a[], int startIndex, int size)
 {
     int maxIndex = startIndex + size - 1;
-    
+
     for(int i = (size - 1) / 2 + startIndex; i>= startIndex; i--)
     {
         int virti = i - startIndex;
-        int lChild = 2*virti + 1 + startIndex;      
+        int lChild = 2*virti + 1 + startIndex;
         int rChild = 2*virti + 2 + startIndex;
 
         if(lChild <= maxIndex && a[i] > a[lChild])
@@ -93,8 +97,8 @@ void heapify(int a[], int startIndex, int size)
         }
         if(rChild <= maxIndex && a[i] > a[rChild])
         {
-            swap(a,i,rChild); 
-        }   
+            swap(a,i,rChild);
+        }
     }
 
 }
@@ -108,4 +112,44 @@ void heapsort(int a[], int size)
     }
 }
 
+void quicksortrec(int a[], int startIndex, int endIndex)
+{
 
+    int lo = startIndex;
+    int hi = endIndex;
+    cout<<"pivot:"<<a[startIndex]<<endl;
+    for(;lo < hi;)
+    {
+        // find first element greater than pivot in left
+        while(a[lo] <= a[startIndex]) {lo++;}
+
+        //find first element less than pivot from right
+        while(a[hi] > a[startIndex]) {hi--;}
+
+        if(lo < hi)
+        {
+            assert(lo < endIndex);
+            assert(hi > startIndex);
+            swap(a,lo,hi);
+        }
+    }
+    // a[lhi] now points to an element smaller than pivot. Swap with pivot and and we are done with all left
+    // less than pivot and all right greater than pivot
+
+    if(lo > hi) swap(a, startIndex, hi);
+
+    if(hi > startIndex)
+    {
+        quicksortrec(a, startIndex, hi - 1);
+    }
+    if(hi + 1 < endIndex)
+    {
+        quicksortrec(a, hi + 1, endIndex);
+    }
+
+}
+
+void quicksort(int a[], int size)
+{
+    quicksortrec(a,0,size-1);
+}
