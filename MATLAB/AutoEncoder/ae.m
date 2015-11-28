@@ -30,7 +30,7 @@ classdef ae
             obj.Activations{1} = rand(inputDim,1);
             
             if hiddenLayerCount > 1
-                for j = 2 : HiddenLayers
+                for j = 2 : hiddenLayerCount
                     obj.Weights{j} = rand(hiddenNodeCount,hiddenNodeCount);
                     obj.Activations{j+1} = rand(hiddenNodeCount,1);
                 end
@@ -51,6 +51,17 @@ classdef ae
                 z = this.Weights{i} * this.Activations{i} + this.Bias(1,i);
                 this.Activations{i+1} = 1 ./(1 + exp(-1 * z));
            end
+       end
+       
+       function this = train(this, input)
+           
+           this = forwardFeed(this, input);
+           
+           [~, layers] = size(this.Activations);
+           
+           errors = cell(1,layers - 1);
+           
+           errors{layers - 1} = this.Activations{layers} - this.Activations{1};
        end
        
     end
