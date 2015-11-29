@@ -56,12 +56,21 @@ classdef ae
        function this = train(this, input)
            
            this = forwardFeed(this, input);
+           derivatives = computeDel(this.Activations);
+
+           [~, layers] = size(this.Activations);           
+           % del of weights
+           wErrors = cell(1, layers - 1);
+           % del of errors
+           bErrors = zeros(layers - 1);
            
-           [~, layers] = size(this.Activations);
+           % For the last layer, del is output - input times del of layer
+           wErrors{layers - 1} = (this.Activations{layers} - this.Activations{1}).*derivatives{layers};
            
-           errors = cell(1,layers - 1);
+           for j = layers - 2: -1 : 1
+               wErrors{j} = (this.Weights{j}*wErrors{j+1}).*derivatives{j};
+           end
            
-           errors{layers - 1} = this.Activations{layers} - this.Activations{1};
        end
        
     end
