@@ -83,7 +83,7 @@ classdef ae
        end
        
        % train from an array of images
-       function this = backGradientDescent(this, inputImages)
+       function this = backGradientDescent(this, inputImages, alpha)
           % use deltaW and deltaB and the applying grad descent on each
  
           deltaW = this.Weights;
@@ -97,16 +97,22 @@ classdef ae
               deltaB{1,i} = zeros(size(this.Bias{1,i}));
           end         
           
-          % for each image
-          for i = 1:imageCount
-              [this, dwJ, dbJ] = backPropogate(this,inputImages(:,i));
-              % update weughts and bias
-              for j = 1:layers
-                  this.Weights{1,j} = this.Weights{1,j} + dwJ{1,j};
-                  this.Bias{1,j} = this.Bias{1,j} + dbJ{1,j};
+          for it = 1 : 50
+              % for each image
+              for i = 1:imageCount
+                  [this, dwJ, dbJ] = backPropogate(this,inputImages(:,i));
+                  for j = 1 : layers
+                      deltaW{1,j} = deltaW{1,j} + dwJ{1,j};
+                      deltaB{1,j} = deltaB{1,j} + dbJ{1,j};
+                  end
+              end
+
+              % update the weight matrices an bias matrices
+              for j = 1 : layers
+                  this.Weights{1,j} = this.Weights{1,j} + alpha / imageCount .* dwJ{1,j};
+                  deltaB{1,j} = deltaB{1,j} + alpha / imageCount .* dbJ{1,j};
               end
           end
-          
        end
        
     end
