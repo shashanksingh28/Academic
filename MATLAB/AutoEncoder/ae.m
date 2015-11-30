@@ -68,10 +68,10 @@ classdef ae
             end
 
             delta = cell(1, layers);
-            delta{1,layers} = -(encoder.Activations{1,1} - encoder.Activations{1,layers});%.*der{1,layers};
+            delta{1,layers} = -(encoder.Activations{1,1} - encoder.Activations{1,layers}).*der{1,layers};
 
             for j = layers - 1: -1 : 2
-               delta{1,j} = ((encoder.Weights{1,j})'*delta{1,j + 1});%.*der{1,j};
+               delta{1,j} = ((encoder.Weights{1,j})'*delta{1,j + 1}).*der{1,j};
             end
 
             % dowWeightJ
