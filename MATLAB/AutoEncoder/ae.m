@@ -49,8 +49,11 @@ classdef ae
            
            for i = 1 : iterations
                 z = ((this.Weights{1,i}) * (this.Activations{1,i})) + this.Bias{1,i};
-                this.Activations{1,i+1} = 1 ./(1 + exp(-1 * z));
+                this.Activations{1,i+1} = 1./(1 + exp(-z));
            end
+           
+%            imshow(reshape(this.Activations{1,3},[32,32]));
+%            waitforbuttonpress;
        end
        
        % Perform BackPropogation on one of the images (input is [pixels x 1])
@@ -65,10 +68,10 @@ classdef ae
             end
 
             delta = cell(1, layers);
-            delta{1,layers} = (encoder.Activations{1,layers} - encoder.Activations{1,1}).*der{1,layers};
+            delta{1,layers} = -(encoder.Activations{1,1} - encoder.Activations{1,layers}).*der{1,layers};
 
-            for j = layers : -1 : 2
-               delta{1,j-1} = ((encoder.Weights{1,j-1})'*delta{1,j}).*der{1,j-1};
+            for j = layers - 1: -1 : 2
+               delta{1,j} = ((encoder.Weights{1,j})'*delta{1,j + 1}).*der{1,j};
             end
 
             % dowWeightJ
@@ -88,29 +91,30 @@ classdef ae
  
           deltaW = this.Weights;
           deltaB = this.Bias;
-          [~, layers] = size(this.Weights);
+          [~, layers] = size(this.Activations);
           [~, imageCount] = size(inputImages);
           
-          % initialize deltaws to 0
-          for i = 1: layers
-              deltaW{1,i} = zeros(size(this.Weights{1,i}));
-              deltaB{1,i} = zeros(size(this.Bias{1,i}));
-          end         
-          
-          for it = 1 : 50
+          for it = 1 : 25
+              % initialize deltas to 0
+              for i = 1: layers - 1
+                  deltaW{1,i} = zeros(size(this.Weights{1,i}));
+                  deltaB{1,i} = zeros(size(this.Bias{1,i}));
+              end  
+              
               % for each image
               for i = 1:imageCount
                   [this, dwJ, dbJ] = backPropogate(this,inputImages(:,i));
-                  for j = 1 : layers
+                  evaluate(this.Activations{1,3}, this.Activations{1,1});
+                  for j = 1 : layers - 1
                       deltaW{1,j} = deltaW{1,j} + dwJ{1,j};
                       deltaB{1,j} = deltaB{1,j} + dbJ{1,j};
                   end
               end
 
               % update the weight matrices an bias matrices
-              for j = 1 : layers
-                  this.Weights{1,j} = this.Weights{1,j} + alpha / imageCount .* dwJ{1,j};
-                  deltaB{1,j} = deltaB{1,j} + alpha / imageCount .* dbJ{1,j};
+              for j = 1 : layers - 1
+                  this.Weights{1,j} = this.Weights{1,j} - alpha / imageCount .* deltaW{1,j};
+                  this.Bias{1,j} = this.Bias{1,j} - alpha / imageCount .* deltaB{1,j};
               end
           end
        end
