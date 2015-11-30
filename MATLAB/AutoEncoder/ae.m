@@ -68,10 +68,10 @@ classdef ae
             end
 
             delta = cell(1, layers);
-            delta{1,layers} = -(encoder.Activations{1,1} - encoder.Activations{1,layers}).*der{1,layers};
+            delta{1,layers} = -(encoder.Activations{1,1} - encoder.Activations{1,layers});%.*der{1,layers};
 
             for j = layers - 1: -1 : 2
-               delta{1,j} = ((encoder.Weights{1,j})'*delta{1,j + 1}).*der{1,j};
+               delta{1,j} = ((encoder.Weights{1,j})'*delta{1,j + 1});%.*der{1,j};
             end
 
             % dowWeightJ
@@ -86,7 +86,7 @@ classdef ae
        end
        
        % train from an array of images
-       function this = backGradientDescent(this, inputImages, alpha)
+       function this = backGradientDescent(this, inputImages, alpha, lambda)
           % use deltaW and deltaB and the applying grad descent on each
  
           deltaW = this.Weights;
@@ -94,7 +94,7 @@ classdef ae
           [~, layers] = size(this.Activations);
           [~, imageCount] = size(inputImages);
           
-          for it = 1 : 25
+          for it = 1 : 50
               % initialize deltas to 0
               for i = 1: layers - 1
                   deltaW{1,i} = zeros(size(this.Weights{1,i}));
@@ -113,7 +113,7 @@ classdef ae
 
               % update the weight matrices an bias matrices
               for j = 1 : layers - 1
-                  this.Weights{1,j} = this.Weights{1,j} - alpha / imageCount .* deltaW{1,j};
+                  this.Weights{1,j} = this.Weights{1,j} - alpha.*(1/imageCount.*deltaW{1,j} + lambda.*this.Weights{1,j});
                   this.Bias{1,j} = this.Bias{1,j} - alpha / imageCount .* deltaB{1,j};
               end
           end
