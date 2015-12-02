@@ -104,7 +104,7 @@ classdef ae
        end
        
        % train from an array of images
-       function [activations, rmse] = backGradientDescent(this, inputImages, alpha, lambda, beta, row, iterations)
+       function [this, activations, rmse] = backGradientDescent(this, inputImages, alpha, lambda, beta, row, iterations)
           
           [~, imageCount] = size(inputImages);
           
