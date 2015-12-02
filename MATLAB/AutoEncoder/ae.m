@@ -8,7 +8,6 @@ classdef ae
         % first column represents the input image pixels and last column the output image
         HiddenLayers
         HiddenNodes
-        
     end
     
     methods
@@ -79,6 +78,7 @@ classdef ae
             delta = cell(1, layers);
             delta{1,layers} = -(activations{1,1} - activations{1,layers}).*der{1,layers};            
             
+            % for hidden layers include divergence
             for j = layers - 1: -1 : 2                 
                 delta{1,j} = (((this.Weights{1,j})'*delta{1,j + 1}) + divergence(:,j-1)).*der{1,j};
             end
@@ -95,17 +95,16 @@ classdef ae
        end
        
        % train from an array of images
-       function activations = backGradientDescent(this, inputImages, alpha, lambda, beta, row)
-          
+       function [activations, rmse] = backGradientDescent(this, inputImages, alpha, lambda, beta, row, iterations)
           
           [~, imageCount] = size(inputImages);
-          
-          
           
           deltaW = this.Weights;
           deltaB = this.Bias;
           
-          for it = 1 : 50              
+          rmse = zeros(imageCount, iterations);
+          
+          for it = 1 : iterations              
               % First calculate forward feed of all images
               activations = this.forwardFeed(inputImages);
               
@@ -117,10 +116,7 @@ classdef ae
                   end
               end
           
-              avgActivations = 1 / imageCount .* avgActivations;
-              
-              % print error
-              
+              avgActivations = 1 / imageCount .* avgActivations;              
               
               % initialize deltas to 0
               for i = 1: this.HiddenLayers + 1
@@ -131,7 +127,7 @@ classdef ae
               % for each image
               for i = 1:imageCount
                   [dwJ, dbJ] = this.backPropogate(activations(i,:), avgActivations, beta, row);
-                  evaluate(activations{i,1},activations{i,3});
+                  rmse(it,i) = evaluate(activations{i,1},activations{i,3});
                   for j = 1 : this.HiddenLayers + 1
                       deltaW{1,j} = deltaW{1,j} + dwJ{1,j};
                       deltaB{1,j} = deltaB{1,j} + dbJ{1,j};
