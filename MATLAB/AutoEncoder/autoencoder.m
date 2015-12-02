@@ -1,7 +1,7 @@
 clear;
-aencoder = ae(1,265,32*32);
+aencoder = ae(1,256,32*32);
 trainImages = getFlatImages('TrainImages');
-[activations, errors] = aencoder.backGradientDescent(trainImages, 1, 0.6, 1, 0.05,50);
+[activations, errors] = aencoder.backGradientDescent(trainImages, 5, 0.6, 1, 0.05, 50);
 
 [valImages, fileNames] = getFlatImages('ValImages');
 [~, imgCount] = size(valImages);

@@ -72,7 +72,14 @@ classdef ae
             end
             
             % divergence for keeping low average activations
-            divergence = beta*(-row./avgActivations + (1 - row)./(1-avgActivations));
+            divergence = avgActivations;
+            for i = 1 : this.HiddenLayers
+                for j = 1 : this.HiddenNodes
+                    divergence(j,i) = beta * ((1 - row)/(1.1 - avgActivations(j,i)) - (row / avgActivations(j,i)));
+                end
+            end
+              
+            %divergence = beta*(-row./avgActivations + (1 - row)./(1.1-avgActivations));
 
             % \dow
             delta = cell(1, layers);
@@ -81,6 +88,8 @@ classdef ae
             % for hidden layers include divergence
             for j = layers - 1: -1 : 2                 
                 delta{1,j} = (((this.Weights{1,j})'*delta{1,j + 1}) + divergence(:,j-1)).*der{1,j};
+                %delta{1,j} = (((this.Weights{1,j})'*delta{1,j + 1})).*der{1,j};
+                
             end
 
             % dowWeightJ
@@ -127,7 +136,7 @@ classdef ae
               % for each image
               for i = 1:imageCount
                   [dwJ, dbJ] = this.backPropogate(activations(i,:), avgActivations, beta, row);
-                  rmse(it,i) = evaluate(activations{i,1},activations{i,3});
+                  rmse(it,i) = evaluate(activations{i,1},activations{i,this.HiddenLayers + 2});
                   for j = 1 : this.HiddenLayers + 1
                       deltaW{1,j} = deltaW{1,j} + dwJ{1,j};
                       deltaB{1,j} = deltaB{1,j} + dbJ{1,j};
@@ -137,7 +146,7 @@ classdef ae
               % update the weight matrices an bias matrices
               for j = 1 : this.HiddenLayers + 1
                   this.Weights{1,j} = this.Weights{1,j} - alpha.*(1/imageCount.*deltaW{1,j} + lambda.*this.Weights{1,j});
-                  this.Bias{1,j} = this.Bias{1,j} - alpha / imageCount .* deltaB{1,j};
+                  this.Bias{1,j} = this.Bias{1,j} - (alpha / imageCount) .* deltaB{1,j};
               end
           end
        end
@@ -145,4 +154,3 @@ classdef ae
     end
     
 end
-
