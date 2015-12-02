@@ -102,7 +102,7 @@ classdef ae
           deltaW = this.Weights;
           deltaB = this.Bias;
           
-          rmse = zeros(imageCount, iterations);
+          rmse = zeros(iterations, imageCount);
           
           for it = 1 : iterations              
               % First calculate forward feed of all images
