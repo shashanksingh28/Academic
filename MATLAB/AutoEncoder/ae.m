@@ -75,7 +75,8 @@ classdef ae
             divergence = avgActivations;
             for i = 1 : this.HiddenLayers
                 for j = 1 : this.HiddenNodes
-                    divergence(j,i) = beta * ((1 - row)/(1.1 - avgActivations(j,i)) - (row / avgActivations(j,i)));
+                    % small offsets are made to avoid division by 0
+                    divergence(j,i) = beta * ((1 - row)/(1.001 - avgActivations(j,i)) - (row / abs(avgActivations(j,i)+0.001)));
                 end
             end
               
